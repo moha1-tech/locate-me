@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: locateme
+      POSTGRES_PASSWORD: locateme
+      POSTGRES_DB: locateme
+    ports:
+      - "5433:5432"
+    volumes:
+      - locateme_pg_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+
+  livekit:
+    image: livekit/livekit-server:latest
+    restart: unless-stopped
+    command: --dev --bind 0.0.0.0 --udp-port 7882-7892
+    environment:
+      LIVEKIT_KEYS: "devkey: secret"
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882-7892:7882-7892/udp"
+
+volumes:
+  locateme_pg_data:

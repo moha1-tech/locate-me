@@ -1,0 +1,7 @@
+api.yourdomain.com {
+	reverse_proxy backend:3010
+}
+
+livekit.yourdomain.com {
+	reverse_proxy livekit:7880
+}

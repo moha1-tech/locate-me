@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PATIENT
+  CAREGIVER
+}
+
+enum Permission {
+  ADMIN
+  VIEW_ONLY
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+}
+
+enum AlertType {
+  SOS
+  GEOFENCE_EXIT
+  LOW_BATTERY
+  CONNECTIVITY_LOST
+}
+
+model User {
+  id               String         @id @default(uuid())
+  email            String         @unique
+  passwordHash     String
+  name             String
+  role             Role
+  devicePushToken  String?
+  lastBatteryLevel Int?
+  lastSeenAt       DateTime?
+  createdAt        DateTime       @default(now())
+
+  ownedCircle       Circle?        @relation("PatientCircle")
+  circleMemberships CircleMember[]
+  locationPings     LocationPing[]
+}
+
+model Circle {
+  id        String         @id @default(uuid())
+  patient   User           @relation("PatientCircle", fields: [patientId], references: [id])
+  patientId String         @unique
+  members   CircleMember[]
+  geofences Geofence[]
+  alerts    Alert[]
+  createdAt DateTime       @default(now())
+}
+
+model CircleMember {
+  id           String       @id @default(uuid())
+  circle       Circle       @relation(fields: [circleId], references: [id])
+  circleId     String
+  caregiver    User         @relation(fields: [caregiverId], references: [id])
+  caregiverId  String
+  permission   Permission   @default(VIEW_ONLY)
+  invitedEmail String?
+  status       InviteStatus @default(PENDING)
+  createdAt    DateTime     @default(now())
+
+  @@unique([circleId, caregiverId])
+}
+
+model LocationPing {
+  id           String   @id @default(uuid())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  latitude     Float
+  longitude    Float
+  accuracy     Float?
+  batteryLevel Int?
+  recordedAt   DateTime @default(now())
+
+  @@index([userId, recordedAt])
+}
+
+model Geofence {
+  id           String   @id @default(uuid())
+  circle       Circle   @relation(fields: [circleId], references: [id])
+  circleId     String
+  name         String
+  centerLat    Float
+  centerLng    Float
+  radiusMeters Int
+  createdAt    DateTime @default(now())
+}
+
+model Alert {
+  id              String     @id @default(uuid())
+  circle          Circle     @relation(fields: [circleId], references: [id])
+  circleId        String
+  type            AlertType
+  message         String
+  latitude        Float?
+  longitude       Float?
+  acknowledgedBy  String?
+  acknowledgedAt  DateTime?
+  createdAt       DateTime   @default(now())
+
+  @@index([circleId, createdAt])
+}

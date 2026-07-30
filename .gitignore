@@ -1,0 +1,7 @@
+# Third-party reference repo, not part of this project
+reference/
+
+# Local Claude Code tooling
+.claude/
+
+Test.txt

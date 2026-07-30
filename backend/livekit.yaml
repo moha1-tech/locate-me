@@ -1,0 +1,11 @@
+port: 7880
+rtc:
+  tcp_port: 7881
+  port_range_start: 7882
+  port_range_end: 7892
+  use_external_ip: true
+keys:
+  # Replace both the key name and secret with your own generated pair
+  # (e.g. `openssl rand -hex 16` / `openssl rand -hex 32`), then copy the
+  # SAME two values into LIVEKIT_API_KEY / LIVEKIT_API_SECRET in .env.production.
+  REPLACE_WITH_YOUR_KEY: REPLACE_WITH_YOUR_SECRET

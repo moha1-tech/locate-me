@@ -1,0 +1,70 @@
+{
+  "expo": {
+    "name": "LocateMe",
+    "slug": "locate-me",
+    "scheme": "locateme",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "extra": {
+      "apiBaseUrl": "http://10.190.20.187:3010",
+      "socketUrl": "http://10.190.20.187:3010/realtime",
+      "liveViewEnabled": false
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.locateme.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "LocateMe needs your location so your caregivers can see where you are.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "LocateMe needs background location so your caregivers can see where you are even when the app is closed.",
+        "NSCameraUsageDescription": "LocateMe uses the camera so a caregiver can see what you see when you share your view.",
+        "NSMicrophoneUsageDescription": "LocateMe uses the microphone so a caregiver can hear you when you share your view or during a call.",
+        "UIBackgroundModes": [
+          "location",
+          "voip"
+        ]
+      }
+    },
+    "android": {
+      "package": "com.locateme.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "CAMERA",
+        "RECORD_AUDIO",
+        "MODIFY_AUDIO_SETTINGS"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "LocateMe needs background location so your caregivers can see where you are even when the app is closed.",
+          "isAndroidBackgroundLocationEnabled": true,
+          "isIosBackgroundLocationEnabled": true
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#1d6fd1"
+        }
+      ]
+    ]
+  }
+}
