@@ -16,9 +16,11 @@ services:
     volumes:
       - ./livekit.yaml:/etc/livekit.yaml:ro
     ports:
-      - "7880:7880"
-      - "7881:7881"
-      - "7882-7892:7882-7892/udp"
+      # Signaling (7880/tcp) is NOT published here: it's only reachable inside
+      # the Docker network, via Caddy's reverse proxy on :48444. Only the RTC
+      # media range needs a direct host/router port, since WebRTC UDP can't
+      # be proxied through Caddy.
+      - "41000-41050:41000-41050/udp"
 
   backend:
     build: .
@@ -32,11 +34,15 @@ services:
       - livekit
 
   caddy:
-    image: caddy:2-alpine
+    build:
+      context: .
+      dockerfile: Caddy.Dockerfile
     restart: unless-stopped
+    env_file:
+      - .env.production
     ports:
-      - "80:80"
-      - "443:443"
+      - "48443:48443"
+      - "48444:48444"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

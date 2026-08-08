@@ -8,8 +8,8 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "extra": {
-      "apiBaseUrl": "http://10.190.20.187:3010",
-      "socketUrl": "http://10.190.20.187:3010/realtime",
+      "apiBaseUrl": "http://localhost:3010",
+      "socketUrl": "http://localhost:3010/realtime",
       "liveViewEnabled": false
     },
     "ios": {

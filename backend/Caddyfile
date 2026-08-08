@@ -1,7 +1,19 @@
-api.yourdomain.com {
+# No port 80 is ever used or forwarded: certificates are issued via DuckDNS's
+# DNS-01 challenge instead of the usual HTTP-01 challenge, so Let's Encrypt
+# never needs to reach this machine on port 80. Only the two ports below
+# (matched by docker-compose.prod.yml and your router's forwarding rules)
+# need to be open.
+
+{$DUCKDNS_DOMAIN}:48443 {
+	tls {
+		dns duckdns {$DUCKDNS_TOKEN}
+	}
 	reverse_proxy backend:3010
 }
 
-livekit.yourdomain.com {
+{$DUCKDNS_DOMAIN}:48444 {
+	tls {
+		dns duckdns {$DUCKDNS_TOKEN}
+	}
 	reverse_proxy livekit:7880
 }

@@ -71,8 +71,38 @@ npx expo start
 - **An EAS project ID** (`eas init` in `mobile/`, needs a free Expo account) — the one remaining piece for push notifications to actually deliver a token.
 - **Google Maps API key (Android only)** — `react-native-maps` uses Apple Maps on iOS for free, but Android requires a Google Maps API key added to `mobile/app.json` under `android.config.googleMaps.apiKey`. Get one from the Google Cloud Console.
 - **Apple Developer Program account** ($99/yr) and **Google Play Console account** ($25 one-time) when you're ready to build and publish real device/store builds — also needed for production push credentials (APNs) and to move off LiveKit's insecure `--dev` mode.
-- **A decision on hosting** for the backend + Postgres + LiveKit (Railway/Render/Fly.io are the low-effort options; AWS/GCP if you want more control, or LiveKit Cloud specifically for the streaming piece) — everything above only runs locally right now.
 - **Legal/privacy sign-off** on the consent flow before onboarding a real patient — see SPECIFICATION.md §4 for why (GDPR "special category" data, HIPAA scoping question).
+
+## Self-hosting on your own machine (no cloud provider)
+
+This is set up to run entirely on a spare machine on your home network — no Railway/AWS/etc. Phones outside the house (cellular data, other Wi-Fi) reach it the same way phones on the home network do, over the internet, and no VPN app is needed on any phone including the patient's.
+
+Every port below is deliberately non-standard so it never collides with other projects you run on the same machine later. Postgres is never exposed to the host or the internet at all — only Docker's internal network can reach it.
+
+| Port | Protocol | Purpose | Forwarded on router? |
+|---|---|---|---|
+| `48443` | TCP | Backend API + realtime (Socket.io), via Caddy | Yes |
+| `48444` | TCP | LiveKit signaling, via Caddy | Yes |
+| `41000-41050` | UDP | LiveKit WebRTC media (can't be proxied through Caddy) | Yes |
+
+### One-time setup
+
+1. **Give the host machine a fixed local IP.** In your router's DHCP settings, reserve an IP for the machine's MAC address so port forwarding never breaks after a reboot.
+2. **Get a free DuckDNS subdomain** at [duckdns.org](https://www.duckdns.org) (e.g. `locateme.duckdns.org`) and note your token. Run their update script/cron job on the host so the subdomain always points at your current home IP even if your ISP changes it.
+3. **Forward the three ports above** on your router to the host's reserved local IP.
+4. **Confirm you're not behind CGNAT**: compare your router's reported WAN IP to what a site like whatismyipaddress.com shows from a phone on cellular data. If they don't match, port forwarding cannot work no matter how it's configured — you'd need a tunnel-based approach instead (e.g. Cloudflare Tunnel), which requires owning a domain.
+5. Generate a LiveKit key/secret pair (`openssl rand -hex 16` / `openssl rand -hex 32`) and put the same pair in both `backend/livekit.yaml` and `.env.production`.
+6. `cp backend/.env.production.example backend/.env.production` and fill in `POSTGRES_PASSWORD`, `JWT_SECRET`, `DUCKDNS_DOMAIN`, `DUCKDNS_TOKEN`, and the LiveKit key/secret pair.
+7. From `backend/`: `docker compose -f docker-compose.prod.yml up -d --build`. Caddy fetches its TLS certificate via DuckDNS's DNS challenge — port 80 is never used or opened.
+8. In `mobile/app.json`, point every phone's build at the public address:
+   ```json
+   "extra": {
+     "apiBaseUrl": "https://locateme.duckdns.org:48443",
+     "socketUrl": "https://locateme.duckdns.org:48443/realtime",
+     "liveViewEnabled": true
+   }
+   ```
+   and the backend's `LIVEKIT_URL` (`wss://locateme.duckdns.org:48444`) flows through automatically via `/circles/:circleId/live-token`.
 
 ## Reference repo
 
